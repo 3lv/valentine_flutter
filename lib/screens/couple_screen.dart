@@ -23,7 +23,6 @@ class _CoupleScreenState extends State<CoupleScreen> {
   final _emailController = TextEditingController();
   final _coupleNameController = TextEditingController();
   final _coupleDescriptionController = TextEditingController();
-  final _apiKeyNameController = TextEditingController();
 
   DateTime _anniversary = DateTime.now();
   bool _isEditing = false;
@@ -35,7 +34,6 @@ class _CoupleScreenState extends State<CoupleScreen> {
     _emailController.dispose();
     _coupleNameController.dispose();
     _coupleDescriptionController.dispose();
-    _apiKeyNameController.dispose();
     super.dispose();
   }
 
@@ -282,13 +280,27 @@ class _CoupleScreenState extends State<CoupleScreen> {
                         ),
                       ),
                     )
-                  : Row(
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.calendar_today, size: 16),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Together since ${DateFormat('MMM d, yyyy').format(couple.anniversary)} ($daysSinceAnniversary days)",
-                          style: const TextStyle(fontSize: 16),
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Together since ${DateFormat('MMM d, yyyy').format(couple.anniversary)}",
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 24),
+                          child: Text(
+                            _formatAnniversaryDuration(daysSinceAnniversary),
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.grey),
+                          ),
                         ),
                       ],
                     ),
@@ -347,106 +359,8 @@ class _CoupleScreenState extends State<CoupleScreen> {
                   ],
                 ),
               ],
-
-              // API Keys
-              if (!_isEditing) ...[
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "API Keys",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    TextButton(
-                      onPressed: () =>
-                          setState(() => _showApiKeys = !_showApiKeys),
-                      child: Text(_showApiKeys ? "Hide" : "Show"),
-                    ),
-                  ],
-                ),
-                if (_showApiKeys) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _apiKeyNameController,
-                          decoration: const InputDecoration(
-                            labelText: "API Key Name",
-                            hintText: "My API Key",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        height: 56, // Match TextField height
-                        child: ElevatedButton(
-                          onPressed: () => _createApiKey(couple.id),
-                          child: const Text("Create"),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  if (couple.apiKeys != null && couple.apiKeys!.isNotEmpty)
-                    ...couple.apiKeys!.map(
-                      (apiKey) => _buildApiKeyCard(apiKey),
-                    ),
-                ],
-              ],
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildApiKeyCard(ApiKey apiKey) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      color: Colors.grey[50],
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: Colors.grey[300]!),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  apiKey.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextButton(
-                  onPressed: () => _copyToClipboard(apiKey.key),
-                  child: Text(_copiedKey == apiKey.key ? 'Copied!' : 'Copy'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Text(
-                  "Created: ${DateFormat('MM/dd/yyyy').format(apiKey.createdAt)}",
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-                if (apiKey.lastUsed != null) ...[
-                  const SizedBox(width: 16),
-                  Text(
-                    "Last used: ${DateFormat('MM/dd/yyyy').format(apiKey.lastUsed!)}",
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                ],
-              ],
-            ),
-          ],
         ),
       ),
     );
@@ -521,19 +435,19 @@ class _CoupleScreenState extends State<CoupleScreen> {
     }
   }
 
-  Future<void> _createApiKey(String coupleId) async {
-    if (_apiKeyNameController.text.isEmpty) {
-      _showSnackBar('Please enter a name for the API key', isError: true);
-      return;
-    }
+  String _formatAnniversaryDuration(int totalDays) {
+    final duration = Duration(days: totalDays);
+    final years = duration.inDays ~/ 365;
+    final months = (duration.inDays % 365) ~/ 30;
+    final days = (duration.inDays % 365) % 30;
 
-    try {
-      await _firebaseService.createApiKey(coupleId, _apiKeyNameController.text);
-      _apiKeyNameController.clear();
-      _showSnackBar('API key creation in progress');
-    } catch (e) {
-      _showSnackBar('Error: ${e.toString()}', isError: true);
-    }
+    final parts = <String>[];
+    if (years > 0) parts.add('$years ${years == 1 ? 'year' : 'years'}');
+    if (months > 0) parts.add('$months ${months == 1 ? 'month' : 'months'}');
+    if (days > 0 || parts.isEmpty)
+      parts.add('$days ${days == 1 ? 'day' : 'days'}');
+
+    return parts.join(', ');
   }
 
   @override
@@ -569,30 +483,6 @@ class _CoupleScreenState extends State<CoupleScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Couple'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.photo),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const BackgroundScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await authProvider.signOut();
-              if (context.mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              }
-            },
-          ),
-        ],
       ),
       body: StreamBuilder<Couple?>(
         stream: _firebaseService.getCoupleStream(),

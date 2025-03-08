@@ -110,42 +110,6 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Upload New Background",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Change your lover's phone and PC background!",
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    ImageUploadWidget(
-                      onFileSelected: _handleFileSelect,
-                    ),
-                    if (_isUploading) ...[
-                      const SizedBox(height: 16),
-                      LinearProgressIndicator(value: _uploadProgress),
-                      const SizedBox(height: 8),
-                      Text(
-                        "Uploading: ${(_uploadProgress * 100).round()}%",
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
             StreamBuilder<List<BackgroundImage>>(
               stream: _storageService.getBackgroundsStream(_coupleId),
               builder: (context, snapshot) {
@@ -245,18 +209,9 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
                 );
               },
             ),
-            const SizedBox(height: 24),
-            _buildServiceStatusIndicator(),
           ],
         ),
       ),
-      /*
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _testWallpaperUpdate,
-        label: const Text('Test Wallpaper'),
-        icon: const Icon(Icons.wallpaper),
-      ),
-      */
     );
   }
 

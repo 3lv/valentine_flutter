@@ -6,6 +6,7 @@ import 'package:valentine_flutter/widgets/auth_wrapper.dart';
 import 'package:valentine_flutter/services/wallpaper_service.dart';
 import 'package:permission_handler/permission_handler.dart'; // Add this
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/services.dart'; // Add this
 
 import 'firebase_options.dart';
 
@@ -14,6 +15,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Add these lines to lock orientation to portrait mode
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   // Request permissions first
   await _requestPermissions();

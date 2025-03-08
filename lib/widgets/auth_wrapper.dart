@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:valentine_flutter/providers/auth_provider.dart';
-import 'package:valentine_flutter/screens/couple_screen.dart';
+import 'package:valentine_flutter/screens/home_screen.dart';
 import 'package:valentine_flutter/screens/welcome_screen.dart';
 
 class AuthWrapper extends StatelessWidget {
@@ -15,7 +15,7 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         // If user is authenticated, go directly to the couple screen
         if (snapshot.hasData) {
-          return const CoupleScreen();
+          return const HomeScreen();
         }
 
         // Otherwise show welcome/login flow

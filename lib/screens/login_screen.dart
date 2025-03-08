@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:valentine_flutter/providers/auth_provider.dart';
-import 'package:valentine_flutter/screens/couple_screen.dart';
+import 'package:valentine_flutter/screens/home_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -33,7 +33,7 @@ class LoginScreen extends StatelessWidget {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const CoupleScreen()),
+                            builder: (context) => const HomeScreen()),
                       );
                     }
                   } catch (e) {

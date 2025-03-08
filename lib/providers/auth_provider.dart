@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:valentine_flutter/models/couple.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -57,6 +58,22 @@ class AuthProvider extends ChangeNotifier {
       return null;
     } catch (e) {
       debugPrint('Error getting user couple ID: $e');
+      return null;
+    }
+  }
+
+  // Add this method to your AuthProvider class
+  Future<Couple?> getCoupleData(String coupleId) async {
+    try {
+      final coupleDoc =
+          await _firestore.collection('couples').doc(coupleId).get();
+
+      if (coupleDoc.exists) {
+        return Couple.fromJson(coupleDoc.data()!, coupleDoc.id);
+      }
+      return null;
+    } catch (e) {
+      print('Error getting couple data: $e');
       return null;
     }
   }

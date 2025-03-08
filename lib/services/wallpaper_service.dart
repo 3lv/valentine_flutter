@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:valentine_flutter/models/background_image.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 
 @pragma('vm:entry-point')
 class WallpaperService {
@@ -51,6 +52,11 @@ class WallpaperService {
     // Initialize Flutter background service
     DartPluginRegistrant.ensureInitialized();
 
+    // Load user settings
+    final prefs = await SharedPreferences.getInstance();
+    final updateFrequencyMinutes =
+        prefs.getInt('wallpaper_update_frequency') ?? 15;
+
     if (service is AndroidServiceInstance) {
       service.setForegroundNotificationInfo(
         title: "Wallpaper Service",
@@ -74,8 +80,9 @@ class WallpaperService {
     // Run immediately when started
     await checkForWallpaperUpdates();
 
-    // Schedule periodic checks every 1 minute
-    periodicTimer = Timer.periodic(const Duration(minutes: 1), (timer) async {
+    // Schedule periodic checks based on user preference
+    periodicTimer = Timer.periodic(Duration(minutes: updateFrequencyMinutes),
+        (timer) async {
       await checkForWallpaperUpdates();
 
       if (service is AndroidServiceInstance) {
@@ -135,14 +142,25 @@ class WallpaperService {
         final response = await http.get(Uri.parse(background.imageUrl));
         final bytes = response.bodyBytes;
 
+        // Decode and ensure correct orientation
+        final image = img.decodeImage(bytes);
+        final fixedImage =
+            img.copyRotate(image!, angle: 360); // Force no rotation
+
         // Save image to temporary file
         final tempDir = await getTemporaryDirectory();
         final file = File('${tempDir.path}/wallpaper.jpg');
-        await file.writeAsBytes(bytes);
+        await file.writeAsBytes(img.encodeJpg(fixedImage, quality: 100));
+
+        // Load user's screen preference
+        final wallpaperLocation =
+            prefs.getInt('wallpaper_location') ?? WallpaperManager.BOTH_SCREEN;
 
         // Set as wallpaper using flutter_wallpaper_manager
         final result = await WallpaperManager.setWallpaperFromFile(
-            file.path, WallpaperManager.HOME_SCREEN);
+          file.path,
+          wallpaperLocation, // Use the saved preference
+        );
 
         if (result) {
           // Save this as the last background we set
