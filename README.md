@@ -1,16 +1,14 @@
-# valentine_flutter
+# Valentine Flutter
 
-A new Flutter project.
+**Flutter version of the Valentine app.**
 
-## Getting Started
+Join your partner in a lovely adventure and make every moment special. This app allows couples to interact in a fun and meaningful way by personalizing their experience together.
 
-This project is a starting point for a Flutter application.
+## Features
 
-A few resources to get you started if this is your first Flutter project:
+- **Change each other's backgr**– Surprise your partner by setting a new background for them.
+- **(Upcoming) Track important moments** – Keep a shared timeline of special dates and memories.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Platform Support
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Currently, the app supports **Android** natively. iOS usage is possible by generating API keys and using Apple Shortcuts
